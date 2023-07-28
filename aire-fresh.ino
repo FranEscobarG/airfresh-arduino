@@ -9,19 +9,18 @@ char *server = "mqtt://23.22.218.241:1883";
 char *subscribeTopic = "esp32";
 char *publishTopic = "esp32.mqtt";
 
-ESP32MQTTClient mqttClient; // All params are set later
+ESP32MQTTClient mqttClient; 
 
-const int mq9Pin = 34;   // Pin analógico al que está conectado el sensor MQ-9
-const int pinRojo = 12;   // Pin para el LED rojo
-const int pinVerde = 13;  // Pin para el LED verde
-const int pinAzul = 14;   // Pin para el LED azul
+const int mq9Pin = 34;  
+const int pinRojo = 12;   
+const int pinVerde = 13; 
+const int pinAzul = 14;   
 
-float lastConcentration = -1.0; // Variable para almacenar el último valor de concentración enviado
+float lastConcentration = -1.0; 
 
 void setup()
 {
     Serial.begin(115200);
-    // Configurar los pines del LED RGB como salidas
     pinMode(pinRojo, OUTPUT);
     pinMode(pinVerde, OUTPUT);
     pinMode(pinAzul, OUTPUT);
@@ -42,39 +41,34 @@ void setup()
 
 void loop()
 {
-    // Leer el valor analógico del sensor MQ-9
     int mq9Value = analogRead(mq9Pin);
 
-    // Convertir el valor analógico en una concentración de CO
-    float concentration = map(mq9Value, 0, 4095, 0, 100); // Ajustar el rango según corresponda
+    float concentration = map(mq9Value, 0, 4095, 0, 100); 
     
     // Verificar si se supera el límite de CO
-    if (concentration <= 66) { // Ajustar el límite según corresponda
+    if (concentration <= 66) { 
       // Encender el LED en color verde
       digitalWrite(pinRojo, LOW);
       digitalWrite(pinVerde, HIGH);
       digitalWrite(pinAzul, LOW);
-    } else if (concentration > 66 && concentration <= 85) { // Serial.println("¡WARNING! Niveles de CO peligrosos detectados");
+    } else if (concentration > 66 && concentration <= 85) { 
       // Encender el LED en color azul
       digitalWrite(pinRojo, LOW);
       digitalWrite(pinVerde, LOW);
       digitalWrite(pinAzul, HIGH);
-    } else { // Concentración > 85 // Serial.println("¡DANGER! Niveles de CO dañinos detectados");
+    } else { 
       // Encender el LED en color rojo
       digitalWrite(pinRojo, HIGH);
       digitalWrite(pinVerde, LOW);
       digitalWrite(pinAzul, LOW);
     }
 
-    // Mostrar el valor de concentración en el monitor serial
     Serial.print("Concentración de CO: ");
     Serial.print(concentration);
     Serial.println(" ppm");
 
-    // Verificar si el valor de concentración es diferente al último valor enviado
     if (concentration != lastConcentration)
     {
-      // Almacenar el nuevo valor de concentración como último valor enviado
       lastConcentration = concentration;
 
       // Envía el valor de concentración a RabbitMQ
@@ -85,9 +79,8 @@ void loop()
       Serial.println(msg);
     }
 
-    delay(5000); // Esperar 6 segundos antes de la siguiente lectura
+    delay(5000);
 }
-
 
 // Función para enviar el mensaje a RabbitMQ
 void sendToRabbitMQ(String message)
